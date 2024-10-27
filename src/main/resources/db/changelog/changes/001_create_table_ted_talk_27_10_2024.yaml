@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-tedtalk
+      author: sachittiwari
+      changes:
+        - createTable:
+            tableName: TED_TALK
+            columns:
+              - column:
+                  name: TED_TALK_ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: TITLE
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: AUTHOR
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: DATE
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: LIKES
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: VIEWS
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: LINK
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+            remarks: "Create Ted Talk table"
