@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: "insert data from csv file for ted talk"
+      author: "sachittiwari"
+      changes:
+        - loadUpdateData:
+            file: "static/data.csv"
+            tableName: "ted_talk"
+            separator: ","
+            encoding: "UTF-8"
+            primaryKey: title

@@ -1,5 +1,7 @@
 package com.sachit.tedtalk.controller;
 
+import com.sachit.tedtalk.exception.TedTalkExistsException;
+import com.sachit.tedtalk.exception.TedTalkNotFoundException;
 import com.sachit.tedtalk.model.TedTalkRequestDTO;
 import com.sachit.tedtalk.model.TedTalkResponseDTO;
 import com.sachit.tedtalk.service.TedTalkService;
@@ -29,7 +31,7 @@ public class TedTalkController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of ted talks",
                     content=@Content(mediaType = "application/json",schema = @Schema(implementation = TedTalkResponseDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Unable to retrieve list of ted talks",
+            @ApiResponse(responseCode = "500", description = "Unable to fetch the details",
                     content=@Content(mediaType = "application/json",schema = @Schema()))
     })
     @GetMapping("/")
@@ -53,14 +55,14 @@ public class TedTalkController {
                     content=@Content(mediaType = "application/json",schema = @Schema()))
     })
     @GetMapping("/{id}")
-    public TedTalkResponseDTO getTedTalkData(Long id) {
+    public TedTalkResponseDTO getTedTalkData(@PathVariable Long id) {
         try {
             TedTalkResponseDTO tedTalk = tedTalkService.getTedTalk(id);
             return tedTalk;
         }
-        catch(Exception e){
-            log.error("Error occurred while fetching the specific ted talk", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to fetch the details");
+        catch(TedTalkNotFoundException e){
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
         }
     }
 
@@ -78,9 +80,13 @@ public class TedTalkController {
             TedTalkResponseDTO newTedTalk = tedTalkService.createTedTalk(tedTalk);
             return newTedTalk;
         }
+        catch(TedTalkExistsException e){
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
+        }
         catch(Exception e){
-            log.error("Unable to create the new ted talk", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to create new Ted Talk");
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
         }
     }
 
@@ -90,8 +96,6 @@ public class TedTalkController {
             @ApiResponse(responseCode = "200", description = "Successfully updated the ted talk details",
                     content=@Content(mediaType = "application/json",schema = @Schema(implementation = TedTalkResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "No ted talk with specified id available",
-                    content=@Content(mediaType = "application/json",schema = @Schema())),
-            @ApiResponse(responseCode = "500", description = "Unable to update the ted talk details",
                     content=@Content(mediaType = "application/json",schema = @Schema()))
     })
     @PutMapping("/{id}")
@@ -100,13 +104,13 @@ public class TedTalkController {
             TedTalkResponseDTO updatedTedTalk = tedTalkService.updateTedTalk(id,tedTalk);
             return updatedTedTalk;
         }
-        catch(ArithmeticException e){
-            log.error("No Ted Talk Available with the given requested id", e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No ted talk available with requested id");
+        catch(TedTalkNotFoundException e){
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
         }
         catch(Exception e){
-            log.error("Unable to update the ted talk", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to update the ted talk");
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
         }
     }
 
@@ -114,10 +118,8 @@ public class TedTalkController {
             description = "This API will delete the ted talk details for the specified id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted the ted talk details",
-                    content=@Content(mediaType = "text",schema = @Schema())),
+                    content=@Content(mediaType = "text/plain",schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "No ted talk with specified id available",
-                    content=@Content(mediaType = "application/json",schema = @Schema())),
-            @ApiResponse(responseCode = "500", description = "Unable to delete the ted talk details",
                     content=@Content(mediaType = "application/json",schema = @Schema()))
     })
     @DeleteMapping("/{id}")
@@ -126,9 +128,9 @@ public class TedTalkController {
             tedTalkService.deleteTedTalk(id);
             return "Successfully deleted the ted talk details";
         }
-        catch(Exception e){
-            log.error("No Ted Talk Available with the given id", e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No ted talk available with the given id");
+        catch(TedTalkNotFoundException e){
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
         }
     }
 

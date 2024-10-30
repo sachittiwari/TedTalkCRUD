@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: "modify data type for link of ted talk"
+      author: "sachittiwari"
+      changes:
+        - modifyDataType:
+            tableName: TED_TALK
+            columnName: LINK
+            newDataType: VARCHAR(500)
