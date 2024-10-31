@@ -7,8 +7,12 @@ import com.sachit.tedtalk.model.TedTalkMapper;
 import com.sachit.tedtalk.model.TedTalkRequestDTO;
 import com.sachit.tedtalk.model.TedTalkResponseDTO;
 import com.sachit.tedtalk.repository.TedTalkRepository;
+import com.sachit.tedtalk.repository.TedTalkSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,11 +30,12 @@ public class TedTalkService {
     @Autowired
     TedTalkMapper tedTalkMapper;
 
+    private static final String TED_TALK_NOT_FOUND = "Ted Talk Not found with the given id";
 
-    public List<TedTalkResponseDTO> getAllTedTalks(){
-                return StreamSupport.stream(tedTalkRepository.findAll().spliterator(),true)
-                        .map(tedTalkMapper::tedTalkToTedTalkResponseDTO)
-                        .collect(Collectors.toList());
+
+    public Page<TedTalkResponseDTO> getAllTedTalks(Pageable pageable){
+                return tedTalkRepository.findAll(pageable)
+                        .map(tedTalkMapper::tedTalkToTedTalkResponseDTO);
     }
 
     public TedTalkResponseDTO getTedTalk(Long id) throws TedTalkNotFoundException{
@@ -38,7 +43,7 @@ public class TedTalkService {
         if(existingTedTalk.isPresent())
             return tedTalkMapper.tedTalkToTedTalkResponseDTO(existingTedTalk.get());
         else
-            throw new TedTalkNotFoundException("Ted Talk Not found with the given id");
+            throw new TedTalkNotFoundException(TED_TALK_NOT_FOUND);
 
     }
 
@@ -53,10 +58,6 @@ public class TedTalkService {
             log.error(e.getMessage(),e);
             throw e;
         }
-        catch (Exception e) {
-            log.error("Unable to create ted talk");
-            throw new RuntimeException("Unable to create ted talk");
-        }
     }
 
     public TedTalkResponseDTO updateTedTalk(Long id, TedTalkRequestDTO tedTalkRequestDTO) throws TedTalkNotFoundException{
@@ -66,13 +67,10 @@ public class TedTalkService {
                 newTedTalk.setId(id);
                 return tedTalkMapper.tedTalkToTedTalkResponseDTO(tedTalkRepository.save(newTedTalk));
             } else
-                throw new TedTalkNotFoundException("Ted Talk Not found with the given id");
+                throw new TedTalkNotFoundException(TED_TALK_NOT_FOUND);
         } catch (TedTalkNotFoundException e) {
             log.error(e.getMessage(),e);
             throw e;
-        }catch (Exception e) {
-            log.error("Unable to update ted talk");
-            throw new RuntimeException("Unable to update ted talk");
         }
     }
 
@@ -80,7 +78,15 @@ public class TedTalkService {
             if(tedTalkRepository.existsById(id))
             tedTalkRepository.deleteById(id);
             else
-                throw new TedTalkNotFoundException("Ted Talk Not Found with the given id");
+                throw new TedTalkNotFoundException(TED_TALK_NOT_FOUND);
+    }
+
+    public Page<TedTalkResponseDTO> searchTedTalks(String author, String title, Long minViews, Long minLikes, Pageable pageable){
+        Specification<TedTalk> searchSpec = Specification.where(TedTalkSpecification.setAuthorIfPresent(author))
+                .and(TedTalkSpecification.matchTitleIfPresent(title))
+                .and(TedTalkSpecification.setMinLikesIfPresent(minLikes))
+                .and(TedTalkSpecification.setMinViewsIfPresent(minViews));
+        return tedTalkRepository.findAll(searchSpec,pageable).map(tedTalkMapper::tedTalkToTedTalkResponseDTO);
     }
 
 }
