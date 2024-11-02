@@ -18,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/tedtalk")
 @Slf4j
@@ -76,7 +74,7 @@ public class TedTalkController {
                     content=@Content(mediaType = "application/json",schema = @Schema()))
     })
     @PostMapping("/")
-    public TedTalkResponseDTO createTedTalk( @RequestBody TedTalkRequestDTO tedTalk) {
+    public TedTalkResponseDTO createTedTalk(@RequestBody TedTalkRequestDTO tedTalk) {
         try {
             return tedTalkService.createTedTalk(tedTalk);
         }
@@ -166,7 +164,7 @@ public class TedTalkController {
         catch(Exception e){
             String errorMessage = "Error while searching ted talks";
             log.error(errorMessage, e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,errorMessage);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,errorMessage);
         }
     }
 

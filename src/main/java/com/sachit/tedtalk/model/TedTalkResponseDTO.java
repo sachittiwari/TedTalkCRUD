@@ -1,7 +1,12 @@
 package com.sachit.tedtalk.model;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class TedTalkResponseDTO {
 

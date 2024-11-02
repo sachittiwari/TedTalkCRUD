@@ -14,11 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -40,38 +36,26 @@ public class TedTalkService {
 
     public TedTalkResponseDTO getTedTalk(Long id) throws TedTalkNotFoundException{
         Optional<TedTalk> existingTedTalk = tedTalkRepository.findById(id);
-        if(existingTedTalk.isPresent())
-            return tedTalkMapper.tedTalkToTedTalkResponseDTO(existingTedTalk.get());
-        else
+        if(!existingTedTalk.isPresent())
             throw new TedTalkNotFoundException(TED_TALK_NOT_FOUND);
-
+        return tedTalkMapper.tedTalkToTedTalkResponseDTO(existingTedTalk.get());
     }
 
     public TedTalkResponseDTO createTedTalk(TedTalkRequestDTO tedTalkRequestDTO) throws TedTalkExistsException {
-        try {
             Optional<TedTalk> existingTedTalk = tedTalkRepository.findByTitle(tedTalkRequestDTO.getTitle());
             if(existingTedTalk.isPresent())
                 throw new TedTalkExistsException("Ted Talk with the same title already exists");
             return tedTalkMapper.tedTalkToTedTalkResponseDTO(tedTalkRepository.save(tedTalkMapper.tedTalkRequestToTedTalk(tedTalkRequestDTO)));
-        }
-        catch (TedTalkExistsException e) {
-            log.error(e.getMessage(),e);
-            throw e;
-        }
     }
 
     public TedTalkResponseDTO updateTedTalk(Long id, TedTalkRequestDTO tedTalkRequestDTO) throws TedTalkNotFoundException{
-        try {
             if (tedTalkRepository.existsById(id)) {
                 TedTalk newTedTalk = tedTalkMapper.tedTalkRequestToTedTalk(tedTalkRequestDTO);
                 newTedTalk.setId(id);
                 return tedTalkMapper.tedTalkToTedTalkResponseDTO(tedTalkRepository.save(newTedTalk));
             } else
                 throw new TedTalkNotFoundException(TED_TALK_NOT_FOUND);
-        } catch (TedTalkNotFoundException e) {
-            log.error(e.getMessage(),e);
-            throw e;
-        }
+
     }
 
     public void deleteTedTalk(Long id) throws TedTalkNotFoundException{
