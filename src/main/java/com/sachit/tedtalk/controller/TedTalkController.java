@@ -26,7 +26,7 @@ public class TedTalkController {
     @Autowired
     TedTalkService tedTalkService;
 
-    @Operation(summary = "Get result of all ted talks",
+    @Operation(summary = "Get result of all the ted talks",
             description = "This API returns all ted talks present in ted talk application")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of ted talks",
